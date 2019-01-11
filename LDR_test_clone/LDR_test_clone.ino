@@ -34,102 +34,108 @@ void loop() {
   for (i = 0; i < 3; i++) {
     if (switchState[i] == 1) {
       if (i == 0) {
-        pixel_0.setPixelColor(i, pixel_0.Color(0, 255, 0));
+        pixel_0.setPixelColor(0, pixel_0.Color(0, 255, 0));
         pixel_0.show();
 
         Serial.println("Switch 0 round 1 is RED!");
       }
       else if (i == 1) {
-        pixel_1.setPixelColor(i, pixel_1.Color(0, 255, 0));
+        pixel_1.setPixelColor(0, pixel_1.Color(0, 255, 0));
         pixel_1.show();
 
         Serial.println("Switch 1 round 1 is RED!");
       }
       else {
-        pixel_2.setPixelColor(i, pixel_2.Color(0, 255, 0));
+        pixel_2.setPixelColor(0, pixel_2.Color(0, 255, 0));
         pixel_2.show();
 
         Serial.println("Switch 2 round 1 is RED!");
       }
 
-      while (triggerDetection[i] == 1) {
-        triggerDetection(i);
-        Serial.println("You should see me ONLY after trigger detection!");
-      }
+      triggerDetection(i);
+      Serial.println("You should see me ONLY after trigger detection!");
 
       if (i == 0) {
-        pixel_0.setPixelColor(i, pixel_0.Color(255, 0, 0));
+        pixel_0.setPixelColor(0, pixel_0.Color(255, 0, 0));
         pixel_0.show();
         Serial.println("Switch 0 round 1 is GREEN!");
       }
       else if (i == 1) {
-        pixel_1.setPixelColor(i, pixel_1.Color(255, 0, 0));
+        pixel_1.setPixelColor(0, pixel_1.Color(255, 0, 0));
         pixel_1.show();
         Serial.println("Switch 1 round 1 is GREEN!");
       }
       else {
-        pixel_2.setPixelColor(i, pixel_2.Color(255, 0, 0));
+        pixel_2.setPixelColor(0, pixel_2.Color(255, 0, 0));
         pixel_2.show();
         Serial.println("Switch 2 round 1 is GREEN!");
       }
     }
   }
 
+  pixel_3.setPixelColor(0, pixel_3.Color(0, 255, 0));
+  pixel_3.show();
+  
   openGate();
-
-  pixel_3.setPixelColor(i, pixel_3.Color(0, 255, 0));
-  while (trigger[3] == 1) {
-    triggerDetection(3);
-    Serial.println("Trigger detection is funcioning as designed!");
-  }
+  
+  triggerDetection(3);
+  Serial.println("Trigger detection is functioning as designed!");
 
   flushSwitch();
 
   for (i = 0; i < 4; i++) {
     if (switchState[i] == 1) {
       if (i == 0) {
-        pixel_0.setPixelColor(i, pixel_0.Color(0, 255, 0));
+        pixel_0.setPixelColor(0, pixel_0.Color(0, 255, 0));
         pixel_0.show();
+
+        Serial.println("Switch 0 round 2 is RED!");
       }
       else if (i == 1) {
-        pixel_1.setPixelColor(i, pixel_1.Color(0, 255, 0));
+        pixel_1.setPixelColor(0, pixel_1.Color(0, 255, 0));
         pixel_1.show();
+
+        Serial.println("Switch 1 round 2 is RED!");
       }
       else if (i == 2) {
-        pixel_2.setPixelColor(i, pixel_2.Color(0, 255, 0));
+        pixel_2.setPixelColor(0, pixel_2.Color(0, 255, 0));
         pixel_2.show();
+
+        Serial.println("Switch 2 round 2 is RED!");
       }
       else {
-        pixel_3.setPixelColor(i, pixel_3.Color(0, 255, 0));
+        pixel_3.setPixelColor(0, pixel_3.Color(0, 255, 0));
         pixel_3.show();
-      }
 
-      Serial.println("Switch ");
-      Serial.print(i);
-      Serial.print(" is REEEEEEEED!");
+        Serial.println("Switch 3 round 2 is RED!");
+      }
 
       triggerDetection(i);
 
       if (i == 0) {
-        pixel_0.setPixelColor(i, pixel_0.Color(255, 0, 0));
+        pixel_0.setPixelColor(0, pixel_0.Color(255, 0, 0));
         pixel_0.show();
+
+        Serial.println("Switch 0 round 2 is GREEN!");
       }
       else if (i == 1) {
-        pixel_1.setPixelColor(i, pixel_1.Color(255, 0, 0));
+        pixel_1.setPixelColor(0, pixel_1.Color(255, 0, 0));
         pixel_1.show();
+
+        Serial.println("Switch 1 round 2 is GREEN!");
       }
       else if (i == 2) {
-        pixel_2.setPixelColor(i, pixel_2.Color(255, 0, 0));
+        pixel_2.setPixelColor(0, pixel_2.Color(255, 0, 0));
         pixel_2.show();
+
+        Serial.println("Switch 2 round 2 is GREEN!");
       }
       else {
-        pixel_3.setPixelColor(i, pixel_3.Color(255, 0, 0));
+        pixel_3.setPixelColor(0, pixel_3.Color(255, 0, 0));
         pixel_3.show();
-      }
 
-      Serial.println("Switch ");
-      Serial.print(i);
-      Serial.print(" is GREEEEEEEN!");
+        Serial.println("Switch 3 round 2 is GREEN!");
+      }
     }
   }
 
@@ -143,36 +149,21 @@ void flushSwitch() {
     switchState[i] = floor(random(0, 2));
     Serial.println(switchState[i]);
   }
+
   switchState[switchNum] = 1;
 
-  trigger[switchNum] = switchState[switchNum];
+  for(i = 0; i <= switchNum; i++){
+    trigger[i] = switchState[i];
+  }
 }
 
 int triggerDetection(int i) {
-/*  do {
-    LDRvalue = analogRead(LDRpin[i]); // read the value from the sensor
-
-    Serial.println(LDRvalue);
-    
-    if (LDRvalue <= 50) {
-      trigger[i] = 0;
-
-      Serial.println("Overwritten!");
-    }
-
-    else
-      Serial.println("Stuck in loooooop!");
-
-    delay(100);
-  }
-*/
-  
   while (trigger[i] == 1) {
     LDRvalue = analogRead(LDRpin[i]); // read the value from the sensor
 
     Serial.println(LDRvalue);
     
-    if (LDRvalue <= 50) {
+    if (LDRvalue <= 5) {
       trigger[i] = 0;
 
       Serial.println("Overwritten!");
