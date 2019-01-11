@@ -9,7 +9,7 @@ Adafruit_NeoPixel pixel_2 = Adafruit_NeoPixel(1, 5, NEO_RGB + NEO_KHZ800);
 Adafruit_NeoPixel pixel_3 = Adafruit_NeoPixel(1, 6, NEO_RGB + NEO_KHZ800);
 
 int LDRpin[] = {A0, A1, A2, A3}; // Input array for LDR
-int LDRvalue =  0;
+double LDRvalueMax = 0, LDRvalueMin = 0, LDRvalue =  0;
 int i = 0;
 
 int switchState[switchNum], trigger[switchNum], gateState;
@@ -75,9 +75,9 @@ void loop() {
 
   pixel_3.setPixelColor(0, pixel_3.Color(0, 255, 0));
   pixel_3.show();
-  
+
   openGate();
-  
+
   triggerDetection(3);
   Serial.println("Trigger detection is functioning as designed!");
 
@@ -142,30 +142,55 @@ void loop() {
   openGate();
 }
 
-//  Randomly resets the switches' states between ON and OFF
-//  Switch 3 is ALWAYS ON
+//  Resets the switches' states
 void flushSwitch() {
+
+  // Randomly resets the switch states between 0 and 1
   for (i = 0; i < switchNum; i++) {
     switchState[i] = floor(random(0, 2));
     Serial.println(switchState[i]);
   }
 
+  // Last switch is ALWAYS ON
   switchState[switchNum] = 1;
 
+  // Set switchState as trigger state
   for(i = 0; i <= switchNum; i++){
     trigger[i] = switchState[i];
   }
 }
 
 int triggerDetection(int i) {
+  LDRvalueMax = analogRead(LDRpin[i]);  // Initialise LDRvalueMax
+  LDRvalueMin = analogRead(LDRpin[i]);  // Initialise LDRvalueMin
+
   while (trigger[i] == 1) {
     LDRvalue = analogRead(LDRpin[i]); // read the value from the sensor
 
+    // Update LDRvalueMax
+    if (LDRvalueMax < LDRvalue) {
+      LDRvalueMax = LDRvalue;
+    }
+
+    // Update LDRvalueMin
+    if (LDRvalueMin > LDRvalue) {
+      LDRvalueMin = LDRvalue;
+    }
+
     Serial.println(LDRvalue);
     
-    if (LDRvalue <= 5) {
+    if ((LDRvalueMin / LDRvalueMax) < 0.2) {
+      Serial.println("This is LDRvalueMin: ");
+      Serial.print(LDRvalueMin);
+      Serial.println();
+      Serial.println("This is LDRvalueMax: ");      
+      Serial.print(LDRvalueMax);
+
       trigger[i] = 0;
 
+      Serial.println("This is relative value: ");
+      Serial.print(LDRvalueMin / LDRvalueMax);
+      Serial.println();  
       Serial.println("Overwritten!");
     }
 
@@ -176,9 +201,14 @@ int triggerDetection(int i) {
 }
 
 void openGate() {
-  if (pixel_3.getPixelColor(16) == 1)
+  if (pixel_3.getPixelColor(8) == 255)
     Serial.println("GATE 2 IS NOW OPENED!");
 
-  else
+  else {
+    Serial.println("This is getColor >> 8: ");
+    Serial.println(pixel_3.getPixelColor(8));
+    Serial.println("This is getColor >> 16: ");
+    Serial.println(pixel_3.getPixelColor(16));
     Serial.println("GATE 1 IS NOW OPENED!");
+  }
 }
