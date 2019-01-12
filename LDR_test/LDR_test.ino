@@ -1,6 +1,7 @@
 #include <Adafruit_NeoPixel.h>
+#include <Servo.h>
 
-#define switchNum 3
+#define switchNum 4
 
 // Constructor: number of LEDs, pin number, LED type
 Adafruit_NeoPixel pixel_0 = Adafruit_NeoPixel(1, 3, NEO_RGB + NEO_KHZ800);
@@ -11,8 +12,18 @@ Adafruit_NeoPixel pixel_3 = Adafruit_NeoPixel(1, 6, NEO_RGB + NEO_KHZ800);
 int LDRpin[] = {A0, A1, A2, A3}; // Input array for LDR
 double LDRvalueMax = 0, LDRvalueMin = 0, LDRvalue = 0;
 int switchState[switchNum], trigger[switchNum], i = 0;
+int  gate1 = 0,  gate2 = 0;
+int servo1 = 9, servo2 = 10;
+
+Servo servogate1;
+Servo servogate2;
 
 void setup() {
+  servogate1.attach(servo1);
+  servogate2.attach(servo2);
+  servogate1.write(0);
+  servogate2.write(0);
+  
   pixel_0.begin();
   pixel_0.show();
   pixel_1.begin();
@@ -25,31 +36,31 @@ void setup() {
 }
 
 void loop() {
+
+  // Part 1
   flushSwitch();
 
   Serial.println("Lights flushed");
 
-  for (i = 0; i < switchNum; i++) {
+  for (i = 0; i < (switchNum - 1); i++) {
+    Serial.print("This switchState: ");
+    Serial.println(switchState[i]);
     if (switchState[i] == 1) {
-
       Serial.println("This is part 1");
       
       if (i == 0) {
         pixel_0.setPixelColor(0, pixel_0.Color(0, 255, 0));
         pixel_0.show();
-
         Serial.println("Switch 0 round 1 is RED!");
       }
       else if (i == 1) {
         pixel_1.setPixelColor(0, pixel_1.Color(0, 255, 0));
         pixel_1.show();
-
         Serial.println("Switch 1 round 1 is RED!");
       }
       else {
         pixel_2.setPixelColor(0, pixel_2.Color(0, 255, 0));
         pixel_2.show();
-
         Serial.println("Switch 2 round 1 is RED!");
       }
 
@@ -74,7 +85,7 @@ void loop() {
     }
   }
 
-  pixel_3.setPixelColor(0, pixel_3.Color(0, 255, 255)); // Set last switch to red
+  pixel_3.setPixelColor(0, pixel_3.Color(0, 255, 0)); // Set last switch to red
   pixel_3.show();
 
   openGate1();
@@ -84,9 +95,15 @@ void loop() {
 
   flushSwitch();
 
+  pixel_3.setPixelColor(0, pixel_3.Color(0, 255, 255)); // Set last switch to magenta
+  pixel_3.show();
+
   Serial.println("Ready for round 2???");
 
-  for (i = 0; i <= switchNum; i++) {
+  // Part 2
+  for (i = 0; i < switchNum; i++) {
+    Serial.print("This switchState: ");
+    Serial.println(switchState[i]);
     if (switchState[i] == 1) {
 
       Serial.println("This is part 2");
@@ -144,11 +161,11 @@ void loop() {
   }
 }
 
-//  Resets the switches' states
+// Resets the switches' states
 void flushSwitch() {
 
   // Randomly resets the switch states between 0 and 1
-  for (i = 0; i < switchNum; i++) {
+  for (i = 0; i < (switchNum - 1); i++) {
     switchState[i] = floor(random(0, 2));
     Serial.println("This is switch ");
     Serial.print(i);
@@ -157,16 +174,24 @@ void flushSwitch() {
   }
 
   // Last switch is ALWAYS ON
-  switchState[switchNum] = 1;
+  switchState[switchNum - 1] = 1;
     Serial.println("This is switch ");
-    Serial.print(switchNum);
+    Serial.print(3);
     Serial.print(": ");
-    Serial.println(switchState[switchNum]);
+    Serial.println(switchState[3]);
 
-  // Set switchState as trigger state
-  for(i = 0; i <= switchNum; i++){
+// Set switchState as trigger state
+  for(i = 0; i < (switchNum - 1); i++){
     trigger[i] = switchState[i];
+    Serial.println("The new trigger ");
+    Serial.print(i);
+    Serial.print(" is: ");
+    Serial.println(trigger[i]);
   }
+
+  trigger[switchNum - 1] = 1;
+  Serial.println("The new trigger 3 is: ");
+  Serial.println(trigger[switchNum - 1]);
 }
 
 int triggerDetection(int i) {
@@ -179,16 +204,22 @@ int triggerDetection(int i) {
     // Update LDRvalueMax
     if (LDRvalueMax < LDRvalue) {
       LDRvalueMax = LDRvalue;
+
+      Serial.println("Updated LDRvalueMax is: ");
+      Serial.println(LDRvalueMax);
     }
 
     // Update LDRvalueMin
     if (LDRvalueMin > LDRvalue) {
       LDRvalueMin = LDRvalue;
+
+      Serial.println("Updated LDRvalueMin is: ");
+      Serial.println(LDRvalueMin);
     }
 
     Serial.println(LDRvalue);
-    
-    if ((LDRvalueMin / LDRvalueMax) < 0.35) {
+
+    if ((LDRvalueMin / LDRvalueMax) < 0.05) {
       Serial.println("This is LDRvalueMin: ");
       Serial.print(LDRvalueMin);
       Serial.println();
@@ -210,9 +241,11 @@ int triggerDetection(int i) {
 }
 
 void openGate1() {
+  servogate1.write(90);
   Serial.println("GATE 1 IS NOW OPENED!");
 }
 
 void openGate2() {
+  servogate2.write(90);
   Serial.println("GATE 2 IS NOW OPENED!");
 }
